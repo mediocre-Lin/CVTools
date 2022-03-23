@@ -4,13 +4,14 @@
 @Time: 2022/03/23 13:54:45
 @Contact: 956744413@qq.com
 """
+import numpy as np
 import torch, torchvision, warnings, random, argparse,os
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from classification.dataSet import camera_Dataset, data_generate
-from common import writeData
+from common import writeData,name_gernerate
 from classification.tools import train, validate
-from common.util.util import name_gernerate
+from classification.Model import classifier_model
 warnings.filterwarnings("ignore")
 torch.backends.cudnn.benchmark = True
 SEED = 2021
@@ -33,15 +34,14 @@ def trainer():
     print("Counts of train_data :", len(train_data))
     print("Counts of val_data :", len(val_data))
 
+    
     epochs = opt.epochs
     lr = opt.lr
     weight_path =opt.weight_path
+    net = opt.model
+    num_classes = len(np.unique(val_label))
 
-    model = torchvision.models.resnet18(pretrained=True)
-    model.avgpool = nn.AdaptiveAvgPool2d(1)
-    fc_features = model.fc.in_features
-    #修改类别为4，重定义最后一层
-    model.fc = nn.Linear(fc_features ,4)
+    model = classifier_model(model_cnn=net,num_class = num_classes)
     model = model.to(device)
 
     criterion = nn.CrossEntropyLoss().to(device)

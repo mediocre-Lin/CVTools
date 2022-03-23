@@ -8,7 +8,8 @@ import torch, torchvision, warnings, random, argparse
 import torch.nn as nn
 from classification.dataSet import camera_Dataset, data_generate
 from classification.tools import validate
-from common import predict_analyze
+from classification.Model import classifier_model
+
 warnings.filterwarnings("ignore")
 torch.backends.cudnn.benchmark = True
 SEED = 2021
@@ -21,6 +22,8 @@ num_workers = 0
 opt = None
 
 
+CLASSES = ['ANNO_1','ANNO_2','ANNO_3','ANNO_4']
+
 def validater():
     _, val_imgs, _, val_label = data_generate(opt.data)
     val_data = camera_Dataset(val_imgs, val_label)
@@ -29,30 +32,39 @@ def validater():
     print("-" * 40)
     print("Counts of val_data :", len(val_data))
 
-    model = torchvision.models.resnet18(pretrained=True)
-    model.avgpool = nn.AdaptiveAvgPool2d(1)
-    fc_features = model.fc.in_features
-    # 修改类别为10，重定义最后一层
-    model.fc = nn.Linear(fc_features, 4)
+    net = opt.model
+    num_classes = opt.num_classes
+    log_path = opt.log_path
+
+    model = classifier_model(model_cnn=net,num_class = num_classes)
     model = model.to(device)
     chkpt = torch.load(opt.log_path, map_location=device)
     model.load_state_dict(chkpt['model'])
+
     criterion = nn.CrossEntropyLoss().to(device)
+    analyze = {
+        'path':log_path,
+        'classes':CLASSES
+    }
 
     val_loss, val_acc, val_multi_acc = validate(
-        val_dataloader, model, criterion)
+        val_dataloader, model, criterion,analyze=analyze)
 
     print('val_loss: %5.5s , acc: %5.5s' % (val_loss, val_acc))
     print('class_1_acc:%5.5s\nclass_2_acc:%5.5s\nclass_3_acc:%5.5s\nclass_4_acc:%5.5s\n' % (
         val_multi_acc[0], val_multi_acc[1], val_multi_acc[2], val_multi_acc[3]))
-    
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int,
-                        default=2)
+                        default=64)
+    parser.add_argument('--num_classes', type=int,
+                        default=4)
     parser.add_argument('--data', type=str,
                         default='data/')
+    parser.add_argument('--model', type=str,
+                        default='resnet18')
     parser.add_argument('--log_path', type=str,
                         default='common/log/classfication/')
     opt = parser.parse_args()
