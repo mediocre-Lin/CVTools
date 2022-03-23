@@ -8,7 +8,7 @@ import numpy as np
 import torch, torchvision, warnings, random, argparse,os
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
-from classification.dataSet import camera_Dataset, data_generate
+from classification.dataset import camera_Dataset, data_generate
 from common import writeData,name_gernerate
 from classification.tools import train, validate
 from classification.Model import classifier_model

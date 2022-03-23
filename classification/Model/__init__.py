@@ -5,4 +5,4 @@
 @Contact: 956744413@qq.com
 """
 
-from modelSet import classifier_model
+from .modelSet import classifier_model

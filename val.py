@@ -6,7 +6,7 @@
 """
 import torch, torchvision, warnings, random, argparse
 import torch.nn as nn
-from classification.dataSet import camera_Dataset, data_generate
+from classification.dataset import camera_Dataset, data_generate
 from classification.tools import validate
 from classification.Model import classifier_model
 
