@@ -27,8 +27,6 @@ class classifier_model(nn.Module):
             self.avgpool = nn.AdaptiveAvgPool2d(1)
             in_feature = list(model_conv.children())[-5].num_features
         self.cnn = model_conv
-        if self.use_spp == True:
-            in_feature = calc_auto(3, in_feature*4)
         self.fc = nn.Linear(in_feature, num_class)
 
 

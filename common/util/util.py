@@ -26,7 +26,7 @@ def multi_class_acc(pre, label, class_num=4):
     acc = np.zeros(class_num)
     for _class in range(class_num):
         class_idx = label == _class
-        acc[_class] =  (pre[class_idx] == label[class_idx]).sum().item() / (class_idx).sum().item()
+        acc[_class] =  (pre[class_idx] == label[class_idx]).sum().item() / ((class_idx).sum().item() + 1e-5)
     return acc
 
 
@@ -64,7 +64,7 @@ def plot_confusion_matrix(cm, path, class_name, title='Confusion Matrix'):
     plt.gcf().subplots_adjust(bottom=0.15)
 
     # show confusion matrix
-    plt.savefig(name_gernerate(path, title), format='png')
+    plt.savefig(name_gernerate(path, title)+'.png', format='png')
     plt.show()
 
 

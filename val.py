@@ -4,11 +4,11 @@
 @Time: 2022/03/23 13:55:03
 @Contact: 956744413@qq.com
 """
-import torch, torchvision, warnings, random, argparse
+import torch, torchvision, warnings, random, argparse, os
 import torch.nn as nn
-from classification.dataset import camera_Dataset, data_generate
+from classification.dataSet import camera_Dataset, data_generate
 from classification.tools import validate
-from classification.Model import classifier_model
+from classification.model import classifier_model
 
 warnings.filterwarnings("ignore")
 torch.backends.cudnn.benchmark = True
@@ -26,21 +26,24 @@ CLASSES = ['ANNO_1','ANNO_2','ANNO_3','ANNO_4']
 
 def validater():
     _, val_imgs, _, val_label = data_generate(opt.data)
+
     val_data = camera_Dataset(val_imgs, val_label)
     val_dataloader = torch.utils.data.DataLoader(
         val_data, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     print("-" * 40)
+
     print("Counts of val_data :", len(val_data))
 
     net = opt.model
     num_classes = opt.num_classes
     log_path = opt.log_path
+    weight_path = os.path.join(log_path,'Best.pt')
 
     model = classifier_model(model_cnn=net,num_class = num_classes)
     model = model.to(device)
-    chkpt = torch.load(opt.log_path, map_location=device)
+    chkpt = torch.load(weight_path, map_location=device)
     model.load_state_dict(chkpt['model'])
-
+    model.eval()
     criterion = nn.CrossEntropyLoss().to(device)
     analyze = {
         'path':log_path,
@@ -66,7 +69,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str,
                         default='resnet18')
     parser.add_argument('--log_path', type=str,
-                        default='common/log/classfication/')
+                        default='/content/drive/MyDrive/Keith/Pixdot/CVTools/common/log/classfication/resnet18_03_23ver_14')
     opt = parser.parse_args()
 
     print(opt)

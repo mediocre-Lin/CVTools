@@ -8,10 +8,10 @@ import numpy as np
 import torch, torchvision, warnings, random, argparse,os
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
-from classification.dataset import camera_Dataset, data_generate
+from classification.dataSet import camera_Dataset, data_generate
 from common import writeData,name_gernerate
 from classification.tools import train, validate
-from classification.Model import classifier_model
+from classification.model import classifier_model
 warnings.filterwarnings("ignore")
 torch.backends.cudnn.benchmark = True
 SEED = 2021
@@ -37,7 +37,7 @@ def trainer():
     
     epochs = opt.epochs
     lr = opt.lr
-    weight_path =opt.weight_path
+    log_path =opt.log_path
     net = opt.model
     num_classes = len(np.unique(val_label))
 
@@ -69,12 +69,12 @@ def trainer():
                     'model': model.state_dict(),
                     'best_acc':best_acc
                 }
-            torch.save(chkpt, weight_path + '/Best.pt')
+            torch.save(chkpt, log_path + '/Best.pt')
         chkpt = {
                 'model': model.state_dict(),
                 'last_acc':val_acc
             }
-        torch.save(chkpt, weight_path + '/last.pt')
+        torch.save(chkpt, log_path + '/last.pt')
 
 
 if __name__ == '__main__':
@@ -92,18 +92,16 @@ if __name__ == '__main__':
     parser.add_argument('--data', type=str,
                         default='data/')
     parser.add_argument('--log_path', type=str,
-                        default='common/log/classfication/')
+                        default='/content/drive/MyDrive/Keith/Pixdot/CVTools/common/log/classfication/')
     parser.add_argument('--amp_train', action='store_true', help='training with amp, faster trainnig')
 
     opt = parser.parse_args()
-    log_path = name_gernerate(opt.path,opt.model)
-
-    if os.makedir(log_path):
-        print('log and weight will be saved in ',log_path)
-        opt.log_path = log_path
-        print(opt)
-    else:
-        print('log path wrong!')
+    log_path = name_gernerate(opt.log_path,opt.model)
+    log_path = os.path.join(opt.log_path,log_path)
+    os.makedirs(log_path)
+    print('log and weight will be saved in ',log_path)
+    opt.log_path = log_path
+    print(opt)
     writer = SummaryWriter(log_path) 
     trainer()
     writer.close()

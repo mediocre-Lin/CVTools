@@ -52,8 +52,9 @@ def train(train_loader, model, criterion, optimizer,amp_mode = True):
             pre_record = predicted.cpu().numpy()
             label_record = label.cpu().numpy()
         else:
-            pre_record = np.concatenate(pre_record,predicted.cpu().numpy())
-            label_record = np.concatenate(label_record,predicted.cpu().numpy())
+            pre_record = np.concatenate((pre_record,predicted.cpu().numpy()))
+            label_record = np.concatenate((label_record,predicted.cpu().numpy()))
+
     acc = (pre_record == label_record).sum() / len(label_record)
     return np.mean(train_loss), acc, multi_class_acc(pre_record,label_record)
 
@@ -78,8 +79,8 @@ def validate(val_loader, model, criterion, analyze = None):
             pre_record = predicted.cpu().numpy()
             label_record = label.cpu().numpy()
         else:
-            pre_record = np.concatenate(pre_record,predicted.cpu().numpy())
-            label_record = np.concatenate(label_record,predicted.cpu().numpy())
+            pre_record = np.concatenate((pre_record,predicted.cpu().numpy()))
+            label_record = np.concatenate((label_record,predicted.cpu().numpy()))
     acc = (pre_record == label_record).sum() / len(label_record)
     if not analyze is None:
         res_path = analyze['path']
