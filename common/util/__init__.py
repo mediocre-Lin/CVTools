@@ -4,4 +4,4 @@
 @Time: 2022/03/23 17:19:51
 @Contact: 956744413@qq.com
 """
-from Util import name_gernerate,multi_class_acc,predict_analyze,writeData
+from .util import name_gernerate,multi_class_acc,predict_analyze,writeData

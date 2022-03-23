@@ -4,4 +4,4 @@
 @Time: 2022/03/23 15:05:06
 @Contact: 956744413@qq.com
 """
-from .Tools import train,validate
+from .tools import train,validate
