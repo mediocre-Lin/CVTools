@@ -7,26 +7,44 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 import random
+import albumentations as al
 SEED = 2021
 random.seed(SEED)
+HEIGHT, WIDTH = 1024, 1024
+al_transform = al.Compose(
+    al.Flip(),
+    al.Rotate(limit=90),
+    al.OneOf([
+        al.CenterCrop(height = HEIGHT, width = WIDTH),
+        al.Resize(height = HEIGHT, width = WIDTH)
+        ], p = 1),
+    al.OneOf([
+        al.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), always_apply=False),
+        al.RandomContrast()
+        ],p = 0.5)
+)
 
 class camera_Dataset(Dataset):
-    def __init__(self, img_path, label_path):
+    def __init__(self, img_path, label_path, trans = al_transform):
         self.img_path = img_path
         self.img_label = label_path
-        self.transform = transforms.Compose([
-                                        transforms.Resize((1024, 1024)),
+        self.transform = trans
+        self.to_tensor = transforms.Compose([
                                         transforms.ToTensor(),
                                         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                                     ])
     def __getitem__(self, index):
         img = Image.open(self.img_path[index]).convert('RGB')
         img = self.transform(img)
-        return img, torch.from_numpy(np.array(self.img_label[index]))
+        return self.to_tensor(img), torch.from_numpy(np.array(self.img_label[index]))
 
     def __len__(self):
         return len(self.img_label)
-        
+
+
+
+
+
 def regular_path(imgs_paths):
     for idx in range(len(imgs_paths)):
         for num in range(1,10):
@@ -73,7 +91,7 @@ def data_generate(data_path):
 
     data_all = lens_anomaly_imgs + glue_anomaly_imgs+film_anomaly_imgs+ no_imaging_anomaly_imgs+IR_edge_anomaly_imgs
     
-    label = [0 for  i in range(len(lens_anomaly_imgs))] + [1 for  i in range(len(glue_anomaly_imgs))] + [2 for i in range(len(film_anomaly_imgs))] + [3 for i in range(len(no_imaging_anomaly_imgs))]+ [4 for i in range(len(IR_edge_anomaly_imgs))]
+    label = [0 for  i in range(len(lens_anomaly_imgs))] + [1 for  i in range(len(glue_anomaly_imgs))] + [1 for i in range(len(film_anomaly_imgs))] + [1 for i in range(len(no_imaging_anomaly_imgs))]+ [1 for i in range(len(IR_edge_anomaly_imgs))]
     pd_df = pd.DataFrame(columns=['path','label'])
     pd_df['path'] = np.array(data_all)
     pd_df['label'] = np.array(label)
