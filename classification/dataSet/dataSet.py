@@ -11,7 +11,7 @@ import albumentations as al
 SEED = 2021
 random.seed(SEED)
 HEIGHT, WIDTH = 1024, 1024
-al_transform = al.Compose(
+al_transform = al.Compose([
     al.Flip(),
     al.Rotate(limit=90),
     al.OneOf([
@@ -22,20 +22,25 @@ al_transform = al.Compose(
         al.CLAHE(clip_limit=4.0, tile_grid_size=(8, 8), always_apply=False),
         al.RandomContrast()
         ],p = 0.5)
-)
+])
 
 class camera_Dataset(Dataset):
-    def __init__(self, img_path, label_path, trans = al_transform):
+    def __init__(self, img_path, label_path, trans = al_transform,mode='train'):
         self.img_path = img_path
         self.img_label = label_path
         self.transform = trans
-        self.to_tensor = transforms.Compose([
+        self.mode = mode
+        self.to_tensor = transforms.Compose([            
+                                        transforms.Resize([HEIGHT,WIDTH]),
                                         transforms.ToTensor(),
                                         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                                     ])
     def __getitem__(self, index):
         img = Image.open(self.img_path[index]).convert('RGB')
-        img = self.transform(img)
+        if self.mode == 'train':
+          img_np = np.array(img)
+          augmented = self.transform(image=img_np)
+          img = Image.fromarray(augmented['image'])
         return self.to_tensor(img), torch.from_numpy(np.array(self.img_label[index]))
 
     def __len__(self):

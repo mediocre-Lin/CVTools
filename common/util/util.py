@@ -22,7 +22,9 @@ def name_gernerate(path, name):
         count += 1
     return file_name+str(count)
 
-def multi_class_acc(pre, label, class_num=4):
+def multi_class_acc(pre, label, class_num=None):
+    
+    class_num = len(np.unique(label)) if class_num is None else class_num
     acc = np.zeros(class_num)
     for _class in range(class_num):
         class_idx = label == _class
@@ -83,15 +85,25 @@ def predict_analyze(predict, label, res_path, class_num=4, class_name=None):
     print(confus_mat)
     plot_confusion_matrix(confus_mat, res_path, classes)
 
-def writeData(writer,loss,acc,multi_acc,epoch,mode='train'):
-    # loss
-    writer.add_scalar('Loss/'+mode, loss, epoch)
-    # acc
-    writer.add_scalar('acc/'+mode, acc, epoch)
-    # multi_acc
-    for i in range(len(multi_acc)):
-      writer.add_scalar('acc/'+mode+'/'+'class:'+str(i), multi_acc[i], epoch)
-    writer.flush()
+def writeData(writer = None,loss = 0 ,acc= 0,multi_acc = 0,epoch = 0 ,mode='train'):
+    if mode == 'test':
+      print('%s_loss: %5.5s , acc: %5.5s'%(mode, loss, acc))
+      for i, c_acc in enumerate(multi_acc):
+        print('calss_%s : %5.5s'%(i+1,c_acc))
+    else:
+      # loss
+      writer.add_scalar('Loss/'+mode, loss, epoch)
+      # acc
+      writer.add_scalar('acc/'+mode, acc, epoch)
+      # multi_acc
+      for i in range(len(multi_acc)):
+        writer.add_scalar('acc/'+mode+'/'+'class:'+str(i), multi_acc[i], epoch)
+      
+      print('%s_loss: %5.5s , acc: %5.5s'%(mode, loss, acc))
+      for i, c_acc in enumerate(multi_acc):
+        print('calss_%s : %5.5s'%(i+1,c_acc))
+      writer.flush()
+
 
 if __name__ == '__main__':
     pre = [0, 1, 2, 3, 3, 1, 2, 0, 0, 0, 1, 1, 0, 0, 0]

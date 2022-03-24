@@ -26,9 +26,9 @@ opt = None
 
 def trainer():
     train_imgs,val_imgs,train_label,val_label = data_generate(opt.data)
-    train_data = camera_Dataset(train_imgs, train_label)
+    train_data = camera_Dataset(train_imgs, train_label, mode = 'train')
     train_dataloader = torch.utils.data.DataLoader(train_data, batch_size=opt.batch_size, shuffle=True,num_workers=0)
-    val_data = camera_Dataset(val_imgs, val_label)
+    val_data = camera_Dataset(val_imgs, val_label, mode = 'val')
     val_dataloader = torch.utils.data.DataLoader(val_data, batch_size=opt.batch_size,  shuffle=False,num_workers=0)
     print("-" * 40)
     print("Counts of train_data :", len(train_data))
@@ -43,7 +43,7 @@ def trainer():
 
     model = classifier_model(model_cnn=net,num_class = num_classes)
     model = model.to(device)
-
+    print(model)
     criterion = nn.CrossEntropyLoss().to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=opt.weight_decay)
@@ -53,14 +53,10 @@ def trainer():
         print('\nEpoch:{}/{}:'.format(epoch, epochs))
 
         train_loss, train_acc, train_multi_acc = train(train_dataloader, model, criterion, optimizer)
-        print('train_loss: %5.5s , acc: %5.5s'%(train_loss,train_acc))
-        print('class_1_acc:%5.5s\nclass_2_acc:%5.5s\nclass_3_acc:%5.5s\nclass_4_acc:%5.5s\n'%(train_multi_acc[0],train_multi_acc[1],train_multi_acc[2],train_multi_acc[3]))
+        
         writeData(writer, train_loss, train_acc, train_multi_acc, epoch, 'train')
         val_loss, val_acc, val_multi_acc = validate(val_dataloader, model, criterion)
         writeData(writer, val_loss, val_acc, val_multi_acc, epoch, 'val')
-
-        print('val_loss: %5.5s , acc: %5.5s'%(val_loss,val_acc))
-        print('class_1_acc:%5.5s\nclass_2_acc:%5.5s\nclass_3_acc:%5.5s\nclass_4_acc:%5.5s\n'%(val_multi_acc[0],val_multi_acc[1],val_multi_acc[2],val_multi_acc[3]))
 
         if val_acc > best_acc:
             print("--------save best ........")

@@ -5,7 +5,9 @@
 @Contact: 956744413@qq.com
 """
 import torch, torchvision, warnings, random, argparse, os
+import numpy as np
 import torch.nn as nn
+from common import writeData
 from classification.dataSet import camera_Dataset, data_generate
 from classification.tools import validate
 from classification.model import classifier_model
@@ -22,18 +24,18 @@ num_workers = 0
 opt = None
 
 
-CLASSES = ['ANNO_1','ANNO_2','ANNO_3','ANNO_4']
+CLASSES = ['ANNO_1','ANNO_2']
 
 def validater():
     _, val_imgs, _, val_label = data_generate(opt.data)
 
-    val_data = camera_Dataset(val_imgs, val_label)
+    val_data = camera_Dataset(val_imgs, val_label,mode = 'val')
     val_dataloader = torch.utils.data.DataLoader(
         val_data, batch_size=opt.batch_size, shuffle=False, num_workers=0)
     print("-" * 40)
 
     print("Counts of val_data :", len(val_data))
-
+    print("distribution of label:", np.bincount(val_label))
     net = opt.model
     num_classes = opt.num_classes
     log_path = opt.log_path
@@ -53,9 +55,7 @@ def validater():
     val_loss, val_acc, val_multi_acc = validate(
         val_dataloader, model, criterion,analyze=analyze)
 
-    print('val_loss: %5.5s , acc: %5.5s' % (val_loss, val_acc))
-    print('class_1_acc:%5.5s\nclass_2_acc:%5.5s\nclass_3_acc:%5.5s\nclass_4_acc:%5.5s\n' % (
-        val_multi_acc[0], val_multi_acc[1], val_multi_acc[2], val_multi_acc[3]))
+    writeData(None, val_loss, val_acc, val_multi_acc, 0, 'test')
 
 
 if __name__ == '__main__':
@@ -63,13 +63,13 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int,
                         default=64)
     parser.add_argument('--num_classes', type=int,
-                        default=4)
+                        default=2)
     parser.add_argument('--data', type=str,
                         default='data/')
     parser.add_argument('--model', type=str,
                         default='resnet18')
     parser.add_argument('--log_path', type=str,
-                        default='/content/drive/MyDrive/Keith/Pixdot/CVTools/common/log/classfication/resnet18_03_23ver_14')
+                        default='/content/drive/MyDrive/Keith/Pixdot/CVTools/common/log/classfication/resnet18_03_24ver_9')
     opt = parser.parse_args()
 
     print(opt)

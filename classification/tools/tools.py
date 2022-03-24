@@ -53,7 +53,7 @@ def train(train_loader, model, criterion, optimizer,amp_mode = True):
             label_record = label.cpu().numpy()
         else:
             pre_record = np.concatenate((pre_record,predicted.cpu().numpy()))
-            label_record = np.concatenate((label_record,predicted.cpu().numpy()))
+            label_record = np.concatenate((label_record,label.cpu().numpy()))
 
     acc = (pre_record == label_record).sum() / len(label_record)
     return np.mean(train_loss), acc, multi_class_acc(pre_record,label_record)
@@ -75,16 +75,16 @@ def validate(val_loader, model, criterion, analyze = None):
             val_loss.append(loss.item() / label.shape[0])
             _, predicted = torch.max(out.data,
                                      dim = 1)
-        if pre_record is None:
-            pre_record = predicted.cpu().numpy()
-            label_record = label.cpu().numpy()
-        else:
-            pre_record = np.concatenate((pre_record,predicted.cpu().numpy()))
-            label_record = np.concatenate((label_record,predicted.cpu().numpy()))
+            if pre_record is None and label_record is None:
+                pre_record = predicted.cpu().numpy()
+                label_record = label.cpu().numpy()
+            else:
+                pre_record = np.concatenate((pre_record,predicted.cpu().numpy()))
+                label_record = np.concatenate((label_record,label.cpu().numpy()))
     acc = (pre_record == label_record).sum() / len(label_record)
     if not analyze is None:
         res_path = analyze['path']
         class_name = analyze['classes']
-        predict_analyze(pre_record,label,res_path,class_name = class_name)
+        predict_analyze(pre_record,label_record,res_path,class_name = class_name)
 
     return np.mean(val_loss), acc, multi_class_acc(pre_record,label_record)
