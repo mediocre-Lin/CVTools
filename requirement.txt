@@ -3,5 +3,6 @@ efficientnet_pytorch
 sklearn
 torch
 torchvision
+torchcam
 tqdm
 albumentations
