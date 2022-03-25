@@ -7,7 +7,7 @@
 import torch, torchvision, warnings, random, argparse, os
 import numpy as np
 import torch.nn as nn
-from common import writeData
+from common import writeData, load_weight
 from classification.dataSet import camera_Dataset, data_generate
 from classification.tools import validate
 from classification.model import classifier_model
@@ -42,9 +42,7 @@ def validater():
     weight_path = os.path.join(log_path,'Best.pt')
 
     model = classifier_model(model_cnn=net,num_class = num_classes)
-    model = model.to(device)
-    chkpt = torch.load(weight_path, map_location=device)
-    model.load_state_dict(chkpt['model'])
+    model = load_weight(model,weight_path,device)
     model.eval()
     criterion = nn.CrossEntropyLoss().to(device)
     analyze = {

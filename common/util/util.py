@@ -6,6 +6,7 @@
 """
 import os
 import time
+import torch
 import numpy as np
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
@@ -104,6 +105,11 @@ def writeData(writer = None,loss = 0 ,acc= 0,multi_acc = 0,epoch = 0 ,mode='trai
         print('calss_%s : %5.5s'%(i+1,c_acc))
       writer.flush()
 
+def load_weight(model,weight_path,device = 'cpu'):
+    model = model.to(device)
+    chkpt = torch.load(weight_path,map_location = device)
+    model.load_state_dict(chkpt['model'])
+    return model
 
 if __name__ == '__main__':
     pre = [0, 1, 2, 3, 3, 1, 2, 0, 0, 0, 1, 1, 0, 0, 0]
