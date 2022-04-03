@@ -6,7 +6,7 @@
 """
 import os
 
-path = 'D:\pixdot\project_camera\\regular_data_two_classes\class_1_annotation' 
+path = 'D:\pixdot\project_camera\glass_defect_data\coco1_camera_defect\\train2017' 
 
 json_file = os.listdir(path)
 
